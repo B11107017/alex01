@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Flight Delay Prediction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    .card {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      background: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005a9e;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      margin-top: 15px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>✈ Flight Delay Prediction</h2>
+
+  <!-- 表單欄位（依 Swagger 定義） -->
+  <label>Year <input id="Year" value="2013"></label>
+  <label>Month <input id="Month" value="6"></label>
+  <label>DayofMonth <input id="DayofMonth" value="17"></label>
+  <label>DayOfWeek <input id="DayOfWeek" value="1"></label>
+  <label>Carrier <input id="Carrier" value="AA"></label>
+  <label>OriginAirportID <input id="OriginAirportID" value="11298"></label>
+  <label>DestAirportID <input id="DestAirportID" value="11433"></label>
+  <label>CRSDepTime <input id="CRSDepTime" value="1620"></label>
+  <label>DepDelay <input id="DepDelay" value="105"></label>
+  <label>DepDel15 <input id="DepDel15" value="1"></label>
+  <label>CRSArrTime <input id="CRSArrTime" value="2000"></label>
+  <label>ArrDelay <input id="ArrDelay" value="87"></label>
+  <label>ArrDel15 <input id="ArrDel15" value="1"></label>
+  <label>Cancelled <input id="Cancelled" value="0"></label>
+
+  <button onclick="predict()">Predict</button>
+
+  <h3>Prediction Result</h3>
+  <pre id="result">尚未送出預測</pre>
+</div>
+
+<script>
+async function predict() {
+
+  // 依照 Swagger 組 payload
+  const payload = {
+    Inputs: {
+      WebServiceInput0: [
+        {
+          Year: Number(Year.value),
+          Month: Number(Month.value),
+          DayofMonth: Number(DayofMonth.value),
+          DayOfWeek: Number(DayOfWeek.value),
+          Carrier: Carrier.value,
+          OriginAirportID: Number(OriginAirportID.value),
+          DestAirportID: Number(DestAirportID.value),
+          CRSDepTime: Number(CRSDepTime.value),
+          DepDelay: Number(DepDelay.value),
+          DepDel15: Number(DepDel15.value),
+          CRSArrTime: Number(CRSArrTime.value),
+          ArrDelay: Number(ArrDelay.value),
+          ArrDel15: Number(ArrDel15.value),
+          Cancelled: Number(Cancelled.value)
+        }
+      ]
+    },
+    GlobalParameters: {}
+  };
+
+  try {
+    const response = await fetch(
+      "http://2285a820-842e-4f76-9be0-2506bcb9c71b.eastasia.azurecontainer.io/score",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ijeNHrFOhkoR5F90LgD1Scfdh1ewSCKx"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const data = await response.json();
+    document.getElementById("result").textContent =
+      JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    document.getElementById("result").textContent =
+      "呼叫 API 失敗：" + err;
+  }
+}
+</script>
+
+</body>
+</html>
